@@ -52,6 +52,12 @@ info:
     enviados pelo iniciador naquela mesma requisição para RJCT e preencher o motivo de rejeição correspondente, 
     FALHA_AGENDAMENTO_PAGAMENTOS. O consentimento irá para CONSUMED.
 
+    - Durante a liquidação de pagamentos agendados, seguindo a resolução BCB n402, de 22/07/2024, previamente ao envio de um
+    pagamento à liquidação, o detentor deve consultar a chave utilizada para o agendamento no DICT. Se a consulta retornar que
+    a chave Pix não está registrada ou que os dados da chave divergem dos dados durante o agendamento, o detentor não deve
+    enviar o Pix para Liquidação. Todos os pagamentos associados a esse consentimento devem ser rejeitados com o
+    motivo CHAVE_PIX_DIVERGENTE_AGENDAMENTO_LIQUIDACAO, e o usuário pagador deve ser notificado
+
     ## Validações
     **Validações** (*após o processo de DCR e obtenção de token client credential*– não escopo dessa documentação)  
     Durante a jornada de iniciação de pagamento, diferentes validações são necessárias pela instituição detentora 
@@ -134,6 +140,7 @@ info:
         &ensp;4.1.8 Demais validações não explicitamente informadas (ex. suspeita de fraude): (NAO_INFORMADO);  
         &ensp;4.1.9 Validação SPI: Externaliza validações no SPI (PAGAMENTO_RECUSADO_SPI);  
         &ensp;4.1.10 Falha em agendamentos: Uma ou mais incidências de pagamento não foram possíveis de ser agendadas (FALHA_AGENDAMENTO_PAGAMENTOS);  
+        &ensp;4.1.11 Divergências entre dados das chaves pix para agendamento e liquidação: O pagamento agendado não pode ser enviado para liquidação devido a divergências entre dados da chave recebedora utilizada para criação do agendamento com a chave recebedora em momento de liquidação (CHAVE_PIX_DIVERGENTE_AGENDAMENTO_LIQUIDACAO).
       4.2 **Casos de erro para validações assíncronas no DICT**  
         &ensp;Neste cenário o pagamento é criado com sucesso (status RCVD) e o consentimento é consumido (status CONSUMED), porém, as validações contra o DICT só ocorrerão de forma assíncrona e em caso de negativa será percebido pela iniciadora na consulta do pagamento (GET /Payments).  
         &ensp;Retorno esperado do endpoint GET /Payments: HTTP Code 200 - OK.  
@@ -1343,6 +1350,7 @@ components:
         - FALHA_INFRAESTRUTURA_DETENTORA
         - CONTAS_ORIGEM_DESTINO_IGUAIS
         - FALHA_AGENDAMENTO_PAGAMENTOS
+        - CHAVE_PIX_DIVERGENTE_AGENDAMENTO_LIQUIDACAO
       example: SALDO_INSUFICIENTE
       description: |
         Define o código da razão pela qual o pagamento foi rejeitado
@@ -1379,6 +1387,8 @@ components:
 
         - CONTAS_ORIGEM_DESTINO_IGUAIS - Indica uma tentativa de pagamento onde a conta origem e a conta de destino são iguais.
 
+        - CHAVE_PIX_DIVERGENTE_AGENDAMENTO_LIQUIDACAO: Divergências entre dados das chaves Pix no agendamento e na liquidação
+
         - FALHA_AGENDAMENTO_PAGAMENTOS - Falha ao agendar pagamentos.
 
         O rejectionReason FALHA_INFRAESTRUTURA não será excluído, apenas deixará de ser utilizado, permitindo assim, retrocompatibilidade e integridade entre os participantes.
@@ -1400,6 +1410,7 @@ components:
         - FALHA_INFRAESTRUTURA_ICP
         - FALHA_INFRAESTRUTURA_PSP_RECEBEDOR
         - FALHA_INFRAESTRUTURA_DETENTORA
+        - CHAVE_PIX_DIVERGENTE_AGENDAMENTO_LIQUIDACAO
         - CONTAS_ORIGEM_DESTINO_IGUAIS
       example: SALDO_INSUFICIENTE
       description: |
@@ -1434,6 +1445,8 @@ components:
         - FALHA_INFRAESTRUTURA_PSP_RECEBEDOR - Indica uma falha na infraestrutura do Prestador de Serviço de Pagamento (PSP) que recebe o pagamento.
 
         - FALHA_INFRAESTRUTURA_DETENTORA - indica uma falha na infraestrutura da instituição detentora das informações ou recursos.
+
+        - CHAVE_PIX_DIVERGENTE_AGENDAMENTO_LIQUIDACAO: Divergências entre dados das chaves Pix no agendamento e na liquidação
 
         - CONTAS_ORIGEM_DESTINO_IGUAIS - Indica uma tentativa de pagamento onde a conta origem e a conta de destino são iguais.
 
