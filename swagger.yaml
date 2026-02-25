@@ -238,7 +238,7 @@ paths:
     post:
       tags:
         - Pagamentos
-      summary: Criar consentimento para a iniciação de pagamento.
+      summary: Criar consentimento para a iniciação de pagamento.  
       operationId: paymentsPostConsents
       description: Método de criação do consentimento para a iniciação de pagamento.
       parameters:
