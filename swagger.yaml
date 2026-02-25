@@ -1022,7 +1022,7 @@ components:
                   CD81390012BR.COM.OUTRO01190123.ABCD.3456.WXYZ6304EB76
                 description: |                  
                   Representa a sequência de caracteres correspondente ao QRCode disponibilizado para o pagador, podendo ser obtido pelo leitor do dispositivo do pagador ou por copia e cola. Deve estar no formato UTF-8 e propiciar o retorno dos dados do pagador após a consulta no DICT. Para casos onde “/data/payment/details/localInstrument” for igual a QRDN ou APDN, os dados da cobrança serão repassados pelo ITP no campo “/data/payment/details/payloadJWS”, permitindo ao detentor validar os dados da cobrança sem a necessidade de consultar o payloadJWS do QRCode em questão através da URL. Não é vedada ao detentor realizar a consulta, porém, em casos de mudança do valor do campo "txId", a detentora deverá confiar no payloadJWS repassado pela ITP.  
-                  [Restrição] Campo de preencimento obrigatório quando o valor de /data/payment/details/localInstrument for igual a QRDN, APDN, QRES ou APES, observado o tamanho máximo de 512 bytes.
+                  [Restrição] Campo de preenchimento obrigatório quando o valor de /data/payment/details/localInstrument for igual a QRDN, APDN, QRES ou APES, observado o tamanho máximo de 512 bytes.
               proxy:
                 $ref: '#/components/schemas/Proxy'
               cnpjInitiator:
@@ -1211,7 +1211,7 @@ components:
             CD81390012BR.COM.OUTRO01190123.ABCD.3456.WXYZ6304EB76
           description: |            
             Representa a sequência de caracteres correspondente ao QRCode disponibilizado para o pagador, podendo ser obtido pelo leitor do dispositivo do pagador ou por copia e cola. Deve estar no formato UTF-8 e propiciar o retorno dos dados do pagador após a consulta no DICT. Para casos onde “/data/payment/details/localInstrument” for igual a QRDN ou APDN, os dados da cobrança serão repassados pelo ITP no campo “/data/payment/details/payloadJWS”, permitindo ao detentor validar os dados da cobrança sem a necessidade de consultar o payloadJWS do QRCode em questão através da URL. Não é vedada ao detentor realizar a consulta, porém, em casos de mudança do valor do campo "txId", a detentora deverá confiar no payloadJWS repassado pela ITP.  
-            [Restrição] Campo de preencimento obrigatório quando o valor de /data/payment/details/localInstrument for igual a QRDN, APDN, QRES ou APES, observado o tamanho máximo de 512 bytes.
+            [Restrição] Campo de preenchimento obrigatório quando o valor de /data/payment/details/localInstrument for igual a QRDN, APDN, QRES ou APES, observado o tamanho máximo de 512 bytes.
         proxy:
           $ref: '#/components/schemas/Proxy'
         creditorAccount:
@@ -2565,7 +2565,7 @@ components:
                   CD81390012BR.COM.OUTRO01190123.ABCD.3456.WXYZ6304EB76
                 description: |                  
                   Representa a sequência de caracteres correspondente ao QRCode disponibilizado para o pagador, podendo ser obtido pelo leitor do dispositivo do pagador ou por copia e cola. Deve estar no formato UTF-8 e propiciar o retorno dos dados do pagador após a consulta no DICT. Para casos onde “/data/payment/details/localInstrument” for igual a QRDN ou APDN, os dados da cobrança serão repassados pelo ITP no campo “/data/payment/details/payloadJWS”, permitindo ao detentor validar os dados da cobrança sem a necessidade de consultar o payloadJWS do QRCode em questão através da URL. Não é vedada ao detentor realizar a consulta, porém, em casos de mudança do valor do campo "txId", a detentora deverá confiar no payloadJWS repassado pela ITP.  
-                  [Restrição] Campo de preencimento obrigatório quando o valor de /data/payment/details/localInstrument for igual a QRDN, APDN, QRES ou APES, observado o tamanho máximo de 512 bytes.
+                  [Restrição] Campo de preenchimento obrigatório quando o valor de /data/payment/details/localInstrument for igual a QRDN, APDN, QRES ou APES, observado o tamanho máximo de 512 bytes.
               remittanceInformation:
                 type: string
                 maxLength: 140
