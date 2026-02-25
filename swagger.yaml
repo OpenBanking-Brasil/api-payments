@@ -99,6 +99,7 @@ info:
           &emsp;1.3.2.3 Detalhes do pagamento: Valida se determinado parâmetro informado obedece às regras de negócio (DETALHE_PAGAMENTO_INVALIDO);  
           &emsp;1.3.2.4 Demais validações não explicitamente informadas (ex. suspeita de fraude): (NAO_INFORMADO);  
           &emsp;1.3.2.5 Idempotência: Valida se há divergência entre chave de idempotência e informações enviadas (ERRO_IDEMPOTENCIA).  
+          &emsp;1.3.2.6  O propósito informado é incompatível com os dados presentes na transação. (PROPOSITO_INVALIDO)
 
     2. **Validações na criação do pagamento - Síncrono (_POST /payments_)**  
       2.1 **Casos de erro relacionados às permissões de segurança para acesso à API (ex. certificado, access_token, jwt, assinatura)**  
@@ -218,7 +219,7 @@ info:
       ## Quantidade máxima permitida para agendamentos recorrentes
       A quantidade máxima de pagamentos que podem transitar do iniciador para o detentor são de 60 pagamentos, independente do modelo de recorrência definido no consentimento, respeitando o prazo máximo de dois anos para agendamentos. 
       Caso a opção de recorrência enviada pelo iniciador não respeite a regra acima, o detentor deve retornar o erro 422 "PARAMETRO_INVALIDO" com o detalhe "Quantidade permitida de pagamentos excedida". 
-  version: 5.0.0-beta.1
+  version: 5.0.0-rc.1
   license:
     name: Apache 2.0
     url: 'https://www.apache.org/licenses/LICENSE-2.0'
@@ -685,6 +686,7 @@ components:
                   - PARAMETRO_INVALIDO
                   - ERRO_IDEMPOTENCIA
                   - NAO_INFORMADO
+                  - PROPOSITO_INVALIDO
                 example: FORMA_PAGAMENTO_INVALIDA
                 description: |
                   Códigos de erros previstos na criação de consentimento para a iniciação de pagamentos:  
@@ -695,6 +697,7 @@ components:
                   • PARAMETRO_INVALIDO: Parâmetro inválido.  
                   • ERRO_IDEMPOTENCIA: Erro idempotência.  
                   • NAO_INFORMADO: Não informado.   
+                  • PROPOSITO_INVALIDO: O propósito informado é incompatível com os dados presentes na transação.    
               title:
                 type: string
                 maxLength: 255
@@ -709,6 +712,7 @@ components:
                   • PARAMETRO_INVALIDO: Parâmetro inválido.  
                   • ERRO_IDEMPOTENCIA: Erro idempotência.  
                   • NAO_INFORMADO: Não informado.    
+                  • PROPOSITO_INVALIDO: O propósito informado é incompatível com os dados presentes na transação.
               detail:
                 type: string
                 maxLength: 2048
@@ -723,6 +727,7 @@ components:
                   • PARAMETRO_INVALIDO: Parâmetro [nome_campo] não obedece as regras de formatação esperadas.  
                   • ERRO_IDEMPOTENCIA: Conteúdo da mensagem (claim data) diverge do conteúdo associado a esta chave de idempotência (x-idempotency-key).  
                   • NAO_INFORMADO: Não reportado/identificado pela instituição detentora de conta.  
+                  • PROPOSITO_INVALIDO: O propósito informado é incompatível com os dados presentes na transação.
         meta:
           $ref: '#/components/schemas/Meta'
     Amount:
