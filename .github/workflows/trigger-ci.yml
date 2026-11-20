@@ -14,50 +14,74 @@ jobs:
     steps:
       - name: Construir a URL RAW do Swagger.yaml (Novo)
         id: get_raw_urls
+        env:
+          HEAD_REPO: ${{ github.event.pull_request.head.repo.full_name }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          BASE_REPO: ${{ github.event.pull_request.base.repo.full_name }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
         run: |
-          SWAGGER_NEW_URL="https://raw.githubusercontent.com/${{ github.event.pull_request.head.repo.full_name }}/${{ github.event.pull_request.head.ref }}/swagger.yaml"
-          SWAGGER_OLD_URL="https://raw.githubusercontent.com/${{ github.event.pull_request.base.repo.full_name }}/${{ github.event.pull_request.base.ref }}/swagger.yaml"
+          SWAGGER_NEW_URL="https://raw.githubusercontent.com/$HEAD_REPO/$HEAD_REF/swagger.yaml"
+          SWAGGER_OLD_URL="https://raw.githubusercontent.com/$BASE_REPO/$BASE_REF/swagger.yaml"
 
           echo "SWAGGER_NEW_URL=$SWAGGER_NEW_URL" >> $GITHUB_ENV
           echo "OLD_SWAGGER_FILE_URL=$SWAGGER_OLD_URL" >> $GITHUB_ENV
 
       - name: Capturar Informações do PR
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          PR_AUTHOR: ${{ github.event.pull_request.user.login }}
+          PR_BODY: ${{ github.event.pull_request.body }}
         run: |
-          echo "PR_TITLE=${{ github.event.pull_request.title }}" >> $GITHUB_ENV
-          echo "PR_URL=${{ github.event.pull_request.html_url }}" >> $GITHUB_ENV
-          echo "PR_AUTHOR=${{ github.event.pull_request.user.login }}" >> $GITHUB_ENV
+          echo "PR_TITLE=$PR_TITLE" >> $GITHUB_ENV
+          echo "PR_URL=$PR_URL" >> $GITHUB_ENV
+          echo "PR_AUTHOR=$PR_AUTHOR" >> $GITHUB_ENV
 
-          # Adicionando suporte a multiline para PR_DESCRIPTION
+          # PR_DESCRIPTION é multilinha e vem do autor do PR: delimitador por execução
           {
-            echo 'PR_DESCRIPTION<<EOF'
-            echo "${{ github.event.pull_request.body }}"
-            echo 'EOF'
+            delimiter="PR_DESCRIPTION_EOF_$RANDOM$RANDOM"
+            echo "PR_DESCRIPTION<<$delimiter"
+            printf '%s\n' "$PR_BODY"
+            echo "$delimiter"
           } >> $GITHUB_ENV
 
       - name: Exibir Variáveis do PR (Debug)
+        env:
+          SWAGGER_NEW_URL: ${{ env.SWAGGER_NEW_URL }}
+          OLD_SWAGGER_FILE_URL: ${{ env.OLD_SWAGGER_FILE_URL }}
+          PR_TITLE: ${{ env.PR_TITLE }}
+          PR_DESCRIPTION: ${{ env.PR_DESCRIPTION }}
+          PR_URL: ${{ env.PR_URL }}
+          PR_AUTHOR: ${{ env.PR_AUTHOR }}
         run: |
-          echo "Swagger YAML (novo): ${{ env.SWAGGER_NEW_URL }}"
-          echo "Swagger YAML (antigo): ${{ env.OLD_SWAGGER_FILE_URL }}"
-          echo "Título do PR: ${{ env.PR_TITLE }}"
-          echo "Descrição do PR: ${{ env.PR_DESCRIPTION }}"
-          echo "URL do PR: ${{ env.PR_URL }}"
-          echo "Autor do PR: ${{ env.PR_AUTHOR }}"
+          echo "Swagger YAML (novo): $SWAGGER_NEW_URL"
+          echo "Swagger YAML (antigo): $OLD_SWAGGER_FILE_URL"
+          echo "Título do PR: $PR_TITLE"
+          echo "Descrição do PR: $PR_DESCRIPTION"
+          echo "URL do PR: $PR_URL"
+          echo "Autor do PR: $PR_AUTHOR"
 
       - name: Acionar workflow no `repo-ci-cd`
+        env:
+          SWAGGER_NEW_URL: ${{ env.SWAGGER_NEW_URL }}
+          OLD_SWAGGER_FILE_URL: ${{ env.OLD_SWAGGER_FILE_URL }}
+          PR_TITLE: ${{ env.PR_TITLE }}
+          PR_DESCRIPTION: ${{ env.PR_DESCRIPTION }}
+          PR_URL: ${{ env.PR_URL }}
+          PR_AUTHOR: ${{ env.PR_AUTHOR }}
+          REPO_ACCESS_TOKEN: ${{ secrets.REPO_ACCESS_TOKEN }}
         run: |
-          PR_DESCRIPTION_CLEANED=$(echo "${{ env.PR_DESCRIPTION }}" | tr '\n' ' ' | tr -d '\r' | jq -Rs .)
+          description=$(printf '%s' "$PR_DESCRIPTION" | tr '\n' ' ' | tr -d '\r')
+          payload=$(jq -cn \
+            --arg swagger "$SWAGGER_NEW_URL" \
+            --arg old_swagger "$OLD_SWAGGER_FILE_URL" \
+            --arg title "$PR_TITLE" \
+            --arg description "$description" \
+            --arg url "$PR_URL" \
+            --arg author "$PR_AUTHOR" \
+            '{ref: "main", inputs: {SWAGGER_FILE_URL: $swagger, OLD_SWAGGER_FILE_URL: $old_swagger, PR_TITLE: $title, PR_DESCRIPTION: $description, PR_URL: $url, PR_AUTHOR: $author}}')
 
           curl -X POST -H "Accept: application/vnd.github.v3+json" \
-            -H "Authorization: token ${{ secrets.REPO_ACCESS_TOKEN }}" \
+            -H "Authorization: token $REPO_ACCESS_TOKEN" \
             https://api.github.com/repos/OpenBanking-Brasil/CI-CD-OFB/actions/workflows/pr-validation-and-jira.yml/dispatches \
-            -d "{
-              \"ref\": \"main\",
-              \"inputs\": {
-                \"SWAGGER_FILE_URL\": \"${{ env.SWAGGER_NEW_URL }}\",
-                \"OLD_SWAGGER_FILE_URL\": \"${{ env.OLD_SWAGGER_FILE_URL }}\",
-                \"PR_TITLE\": \"${{ env.PR_TITLE }}\",
-                \"PR_DESCRIPTION\": $PR_DESCRIPTION_CLEANED,
-                \"PR_URL\": \"${{ env.PR_URL }}\",
-                \"PR_AUTHOR\": \"${{ env.PR_AUTHOR }}\"
-              }
-            }"
+            -d "$payload"
